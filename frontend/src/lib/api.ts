@@ -23,7 +23,11 @@ export async function getStatus() {
   return (await fetch(`${BASE}/status`)).json()
 }
 
-export async function runDigest() {
+export async function getDigest(): Promise<{ content: string }> {
+  return (await fetch(`${BASE}/digest`)).json()
+}
+
+export async function runDigest(): Promise<{ content: string }> {
   return (await fetch(`${BASE}/digest/run`, { method: 'POST' })).json()
 }
 

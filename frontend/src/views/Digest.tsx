@@ -1,16 +1,20 @@
-import { useState } from 'react'
-import { runDigest } from '../lib/api'
+import { useState, useEffect } from 'react'
+import { getDigest, runDigest } from '../lib/api'
 import Markdown from '../components/Markdown'
 
 export default function Digest() {
   const [content, setContent] = useState<string>('')
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    getDigest().then(d => { if (d.content) setContent(d.content) })
+  }, [])
+
   async function refresh() {
     setLoading(true)
     try {
-      await runDigest()
-      setContent('Digest triggered — check terminal for output.')
+      const d = await runDigest()
+      if (d.content) setContent(d.content)
     } finally {
       setLoading(false)
     }
@@ -31,7 +35,9 @@ export default function Digest() {
       {content ? (
         <Markdown className="prose prose-invert prose-sm max-w-none text-xs">{content}</Markdown>
       ) : (
-        <p className="text-[#555] text-xs">Click refresh to run the digest</p>
+        <p className="text-[#555] text-xs">
+          {loading ? 'Generating digest...' : 'Click ↻ refresh to generate your morning briefing'}
+        </p>
       )}
     </div>
   )
