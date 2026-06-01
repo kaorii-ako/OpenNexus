@@ -48,17 +48,35 @@ sources = [
 
 [connectors.notion]
 enabled = true
+# token stored in ~/.nexus/notion.json → {"token": "secret_..."}
+
 [connectors.discord]
 enabled = true
+# token stored in ~/.nexus/discord.json → {"token": "Bot <your_bot_token>"}
+
 [connectors.github]
 enabled = true
+# token stored in ~/.nexus/github.json → {"token": "ghp_..."}
+# required scopes: repo, notifications, read:user
+
 [connectors.gmail]
 enabled = true
+# credentials stored in ~/.nexus/gmail_credentials.json (download from GCP console)
+# token auto-saved to ~/.nexus/gmail_token.json after first auth
+
 [connectors.calendar]
 enabled = true
+# shares OAuth token with gmail connector
+
 [connectors.classroom]
 enabled = true
+# shares OAuth token with gmail connector
+# requires Classroom API scope added to GCP project
+
 [connectors.telegram]
 enabled = false
+# stub only — not yet implemented
+
 [connectors.spotify]
 enabled = false
+# stub only — not yet implemented
