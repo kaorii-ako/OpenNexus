@@ -2,7 +2,13 @@
 from __future__ import annotations
 import asyncio
 import json
+import sys
 from pathlib import Path
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 import typer
 from rich.console import Console
@@ -15,7 +21,7 @@ from backend.core.memory import MemoryStore
 from backend.agents.chat import chat_once, chat_stream
 
 app = typer.Typer(help="NEXUS — personal intelligence layer")
-console = Console()
+console = Console(legacy_windows=False)
 _cfg = None
 _engine = None
 _store = None
