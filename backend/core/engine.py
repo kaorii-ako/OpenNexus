@@ -25,7 +25,6 @@ class OllamaEngine:
         self,
         messages: list[dict],
         model: str | None = None,
-        stream: bool = False,
     ) -> str:
         m = model or self.model
         async with httpx.AsyncClient(timeout=120) as client:

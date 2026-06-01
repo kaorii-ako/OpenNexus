@@ -28,8 +28,27 @@ async def test_chat_non_stream(engine):
             "done": True
         })
     )
-    result = await engine.chat([{"role": "user", "content": "hi"}], stream=False)
+    result = await engine.chat([{"role": "user", "content": "hi"}])
     assert result == "Hello!"
+
+
+@respx.mock
+@pytest.mark.asyncio
+async def test_stream_chat(engine):
+    engine.set_models(code="qwen2.5-coder:7b", reasoning="deepseek-r1:7b")
+    # Simulate a streaming response with 3 chunks
+    streaming_body = (
+        b'{"message":{"role":"assistant","content":"Hello"},"done":false}\n'
+        b'{"message":{"role":"assistant","content":" World"},"done":false}\n'
+        b'{"message":{"role":"assistant","content":""},"done":true}\n'
+    )
+    respx.post("http://localhost:11434/api/chat").mock(
+        return_value=httpx.Response(200, content=streaming_body)
+    )
+    tokens = []
+    async for token in engine.stream_chat([{"role": "user", "content": "hi"}]):
+        tokens.append(token)
+    assert tokens == ["Hello", " World"]
 
 
 @respx.mock
