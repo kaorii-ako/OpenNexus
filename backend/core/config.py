@@ -81,8 +81,15 @@ def load_config(path: Path | str | None = None) -> NexusConfig:
     if path is None:
         path = Path("nexus.toml")
     path = Path(path)
+    if not path.exists():
+        raise FileNotFoundError(f"Config file not found: {path}. Copy nexus.toml.example to nexus.toml.")
     with open(path, "rb") as f:
         raw = tomllib.load(f)
+
+    required_sections = ["nexus", "ollama", "memory", "server", "scheduler", "digest", "connectors"]
+    for section in required_sections:
+        if section not in raw:
+            raise ValueError(f"Missing required section [{section}] in {path}")
 
     n = raw["nexus"]
     o = raw["ollama"]
@@ -90,12 +97,19 @@ def load_config(path: Path | str | None = None) -> NexusConfig:
     s = raw["server"]
     sc = raw["scheduler"]
     d = raw["digest"]
-    cw = raw["connectors"]["weather"]
+    cw = raw["connectors"].get("weather", {})
     cr = raw["connectors"].get("rss", {})
 
+    if not cw:
+        raise ValueError("Missing [connectors.weather] in config")
+
+    # expand data_dir first, then build notion_cache_dir default
+    data_dir = Path(n["data_dir"]).expanduser()
+    notion_cache_dir = Path(n.get("notion_cache_dir", str(data_dir / "notion_cache"))).expanduser()
+
     return NexusConfig(
-        data_dir=Path(n["data_dir"]).expanduser(),
-        notion_cache_dir=Path(n.get("notion_cache_dir", f"{n['data_dir']}/notion_cache")).expanduser(),
+        data_dir=data_dir,
+        notion_cache_dir=notion_cache_dir,
         timezone=n["timezone"],
         ollama=OllamaConfig(**{k: o[k] for k in OllamaConfig.__dataclass_fields__}),
         memory=MemoryConfig(**{k: m[k] for k in MemoryConfig.__dataclass_fields__}),
