@@ -1,0 +1,64 @@
+[nexus]
+data_dir = "~/.nexus"
+notion_cache_dir = "~/.nexus/notion_cache"
+timezone = "Asia/Bangkok"
+
+[ollama]
+base_url = "http://localhost:11434"
+model_general = "qwen2.5:7b"
+model_code = "qwen2.5-coder:7b"
+model_reasoning = "deepseek-r1:7b"
+model_embed = "nomic-embed-text"
+stream = true
+
+[memory]
+chroma_dir = "~/.nexus/chroma"
+notion_collection = "notion_chunks"
+conversation_collection = "conversation_history"
+file_collection = "file_index"
+top_k = 5
+chunk_strategy = "heading"
+
+[server]
+host = "127.0.0.1"
+port = 8000
+frontend_dist = "./frontend/dist"
+open_browser_on_start = true
+
+[scheduler]
+digest_cron = "0 8 * * *"
+notion_sync_cron = "*/15 * * * *"
+reindex_cron = "0 2 * * *"
+
+[digest]
+write_to_notion = true
+print_to_terminal = true
+
+[connectors.weather]
+latitude = 13.7563
+longitude = 100.5018
+location_name = "Bangkok"
+
+[connectors.rss]
+sources = [
+  "https://feeds.feedburner.com/oreilly/radar",
+  "https://tldr.tech/api/rss/tech",
+  "https://hnrss.org/frontpage",
+]
+
+[connectors.notion]
+enabled = true
+[connectors.discord]
+enabled = true
+[connectors.github]
+enabled = true
+[connectors.gmail]
+enabled = true
+[connectors.calendar]
+enabled = true
+[connectors.classroom]
+enabled = true
+[connectors.telegram]
+enabled = false
+[connectors.spotify]
+enabled = false
