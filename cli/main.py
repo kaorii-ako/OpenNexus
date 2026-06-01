@@ -1,6 +1,7 @@
 # cli/main.py
 from __future__ import annotations
 import asyncio
+import json
 from pathlib import Path
 
 import typer
@@ -171,23 +172,49 @@ def digest():
 
 
 @app.command()
-def connect(service: str = typer.Argument(..., help="Service to connect: google, notion, github, discord")):
-    """Interactive setup for connector credentials."""
+def connect(
+    service: str = typer.Argument("all", help="Service to connect: google | notion | github | discord | all"),
+):
+    """Authorize and connect external services."""
     cfg, _, _ = _init()
 
-    if service == "google":
-        from backend.connectors.google_auth import run_google_oauth
-        run_google_oauth(cfg.data_dir)
-        console.print("[green]✓[/green] Google OAuth complete")
-    elif service == "notion":
-        from backend.connectors.notion import NotionConnector
-        async def _scaffold():
-            nc = NotionConnector(cfg)
-            await nc.scaffold_workspace()
-            console.print("[green]✓[/green] Notion workspace scaffold created")
-        asyncio.run(_scaffold())
-    else:
-        console.print(f"[red]Unknown service:[/red] {service}. Try: google, notion")
+    if service in ("google", "all"):
+        console.print("[bold]Connecting Google (Gmail · Calendar · Classroom)...[/bold]")
+        try:
+            from backend.connectors.google_auth import authorize_google
+            authorize_google(cfg.data_dir)
+            console.print("[green]✓ Google authorized[/green]")
+        except FileNotFoundError as e:
+            console.print(f"[red]✗ {e}[/red]")
+        except Exception as e:
+            console.print(f"[red]✗ Google auth failed: {e}[/red]")
+
+    if service in ("notion", "all"):
+        notion_path = cfg.data_dir / "notion.json"
+        if notion_path.exists():
+            console.print("[green]✓ Notion token found[/green]")
+        else:
+            token = typer.prompt("Paste your Notion integration token (secret_...)")
+            notion_path.write_text(json.dumps({"token": token}))
+            console.print(f"[green]✓ Notion token saved to {notion_path}[/green]")
+
+    if service in ("github", "all"):
+        gh_path = cfg.data_dir / "github.json"
+        if gh_path.exists():
+            console.print("[green]✓ GitHub token found[/green]")
+        else:
+            token = typer.prompt("Paste your GitHub Personal Access Token")
+            gh_path.write_text(json.dumps({"token": token}))
+            console.print(f"[green]✓ GitHub token saved to {gh_path}[/green]")
+
+    if service in ("discord", "all"):
+        dc_path = cfg.data_dir / "discord.json"
+        if dc_path.exists():
+            console.print("[green]✓ Discord token found[/green]")
+        else:
+            token = typer.prompt("Paste your Discord Bot token (Bot <token>)")
+            dc_path.write_text(json.dumps({"token": token}))
+            console.print(f"[green]✓ Discord token saved to {dc_path}[/green]")
 
 
 if __name__ == "__main__":
