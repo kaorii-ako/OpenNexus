@@ -5,7 +5,7 @@ import httpx
 from pathlib import Path
 
 from backend.core.config import (
-    NexusConfig, OllamaConfig, MemoryConfig, ServerConfig,
+    NexusConfig, UserConfig, LLMConfig, OllamaConfig, MemoryConfig, ServerConfig,
     SchedulerConfig, DigestConfig, ConnectorsConfig, WeatherConfig,
 )
 from backend.connectors.github import GitHubConnector
@@ -21,6 +21,8 @@ def make_cfg(tmp_path: Path) -> NexusConfig:
         data_dir=tmp_path,
         notion_cache_dir=tmp_path / "notion_cache",
         timezone="Asia/Bangkok",
+        user=UserConfig(name="Test", timezone="Asia/Bangkok", role="tester"),
+        llm=LLMConfig(provider="ollama", model="llama3.2", api_key="", base_url="http://localhost:11434", embed_model="nomic-embed-text"),
         ollama=OllamaConfig(
             "http://localhost:11434", "qwen2.5:7b", "qwen2.5-coder:7b",
             "deepseek-r1:7b", "nomic-embed-text",

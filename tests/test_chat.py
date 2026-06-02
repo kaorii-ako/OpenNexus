@@ -75,16 +75,16 @@ def test_select_model_default(cfg):
     assert _select_model("what is 2+2", cfg) == "qwen2.5:7b"
 
 
-def test_build_system_prompt_with_chunks():
+def test_build_system_prompt_with_chunks(cfg):
     chunks = [{"page_title": "About", "heading": "Intro", "text": "NEXUS is awesome"}]
-    prompt = _build_system_prompt(chunks, {})
+    prompt = _build_system_prompt(chunks, {}, cfg)
     assert "NEXUS" in prompt
     assert "About / Intro" in prompt
     assert "NEXUS is awesome" in prompt
 
 
-def test_build_system_prompt_with_live_ctx():
-    prompt = _build_system_prompt([], {"weather": "Sunny 30°C", "calendar": None})
+def test_build_system_prompt_with_live_ctx(cfg):
+    prompt = _build_system_prompt([], {"weather": "Sunny 30°C", "calendar": None}, cfg)
     assert "Sunny 30°C" in prompt
     assert "calendar" not in prompt  # None values are excluded
 

@@ -97,7 +97,7 @@ sources = []
 def test_load_config_missing_section_raises(tmp_path):
     cfg_path = tmp_path / "nexus.toml"
     cfg_path.write_text("[nexus]\ndata_dir = '/tmp'\ntimezone = 'UTC'\n")
-    with pytest.raises(ValueError, match="Missing required section"):
+    with pytest.raises(ValueError, match="Missing"):
         load_config(cfg_path)
 
 

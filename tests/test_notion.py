@@ -9,13 +9,15 @@ from backend.connectors.notion_sync import NotionSync
 @pytest.fixture
 def cfg(tmp_path):
     from backend.core.config import (
-        NexusConfig, OllamaConfig, MemoryConfig, ServerConfig,
+        NexusConfig, UserConfig, LLMConfig, OllamaConfig, MemoryConfig, ServerConfig,
         SchedulerConfig, DigestConfig, ConnectorsConfig, WeatherConfig
     )
     return NexusConfig(
         data_dir=tmp_path,
         notion_cache_dir=tmp_path / "notion_cache",
         timezone="Asia/Bangkok",
+        user=UserConfig(name="Test", timezone="Asia/Bangkok", role="tester"),
+        llm=LLMConfig(provider="ollama", model="llama3.2", api_key="", base_url="http://localhost:11434", embed_model="nomic-embed-text"),
         ollama=OllamaConfig(
             base_url="http://localhost:11434",
             model_general="qwen2.5:7b",

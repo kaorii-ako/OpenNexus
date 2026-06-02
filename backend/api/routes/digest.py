@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from fastapi import APIRouter, Request
 from sqlmodel import Session, select
@@ -12,7 +12,7 @@ def _save_digest(data_dir: Path, content: str) -> None:
     engine = get_engine(data_dir)
     with Session(engine) as session:
         entry = DigestLog(
-            date=datetime.utcnow().strftime("%Y-%m-%d"),
+            date=datetime.now(timezone.utc).strftime("%Y-%m-%d"),
             content=content,
         )
         session.add(entry)
@@ -50,7 +50,7 @@ async def run_digest(request: Request):
     _save_digest(cfg.data_dir, content)
     return {
         "content": content,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": datetime.now(timezone.utc).isoformat(),
     }
 
 
