@@ -23,12 +23,20 @@ export async function getStatus() {
   return (await fetch(`${BASE}/status`)).json()
 }
 
-export async function getDigest(): Promise<{ content: string }> {
+export async function getDigest(): Promise<{ content: string; generated_at: string | null }> {
   return (await fetch(`${BASE}/digest`)).json()
 }
 
-export async function runDigest(): Promise<{ content: string }> {
+export async function runDigest(): Promise<{ content: string; generated_at: string | null }> {
   return (await fetch(`${BASE}/digest/run`, { method: 'POST' })).json()
+}
+
+export async function getConfig(): Promise<{
+  user: { name: string; timezone: string; role: string }
+  llm: { provider: string; model: string }
+  connectors: Record<string, boolean>
+}> {
+  return (await fetch(`${BASE}/config`)).json()
 }
 
 export async function getNotionTree() {

@@ -16,9 +16,10 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 
 from backend.core.config import load_config
-from backend.core.engine import OllamaEngine
+from backend.core.llm import create_backend
 from backend.core.memory import MemoryStore
 from backend.agents.chat import chat_once, chat_stream
+from cli.init import run_init
 
 app = typer.Typer(help="NEXUS — personal intelligence layer")
 console = Console(legacy_windows=False)
@@ -31,14 +32,17 @@ def _init():
     global _cfg, _engine, _store
     if _cfg is None:
         _cfg = load_config()
-        _engine = OllamaEngine(
-            base_url=_cfg.ollama.base_url,
-            model=_cfg.ollama.model_general,
-            embed_model=_cfg.ollama.model_embed,
-        )
-        _engine.set_models(_cfg.ollama.model_code, _cfg.ollama.model_reasoning)
+        _engine = create_backend(_cfg.llm)
         _store = MemoryStore(Path(_cfg.memory.chroma_dir).expanduser())
     return _cfg, _engine, _store
+
+
+@app.command()
+def init(
+    output: str = typer.Option("nexus.toml", help="Output path for config file"),
+):
+    """Interactive setup wizard — generates nexus.toml."""
+    run_init(output_path=Path(output))
 
 
 @app.command()

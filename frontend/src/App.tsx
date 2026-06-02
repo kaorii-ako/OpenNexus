@@ -1,9 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
+import Dashboard from './views/Dashboard'
 import Chat from './views/Chat'
 import Digest from './views/Digest'
 import NotionView from './views/Notion'
-import Status from './views/Status'
+import Settings from './views/Settings'
 
 export default function App() {
   return (
@@ -12,11 +13,12 @@ export default function App() {
         <Sidebar />
         <main className="flex-1 overflow-auto">
           <Routes>
-            <Route path="/" element={<Navigate to="/digest" />} />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/digest" element={<Digest />} />
             <Route path="/chat" element={<Chat />} />
             <Route path="/notion" element={<NotionView />} />
-            <Route path="/status" element={<Status />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </main>
       </div>
