@@ -1,25 +1,28 @@
 from __future__ import annotations
-import asyncio
-from datetime import datetime
-from typing import AsyncIterator
+from typing import AsyncIterator, TYPE_CHECKING
 
 from backend.core.config import NexusConfig
-from backend.core.engine import OllamaEngine
 from backend.core.memory import MemoryStore
 from backend.agents.rag import retrieve
 
+if TYPE_CHECKING:
+    from backend.core.llm.base import LLMBackend
+
 
 def _select_model(query: str, cfg: NexusConfig) -> str:
+    code_model = cfg.llm.model_code or cfg.llm.model
+    reasoning_model = cfg.llm.model_reasoning or cfg.llm.model
     if query.startswith("/code"):
-        return cfg.ollama.model_code
+        return code_model
     if query.startswith("/think"):
-        return cfg.ollama.model_reasoning
-    return cfg.ollama.model_general
+        return reasoning_model
+    return cfg.llm.model
 
 
-def _build_system_prompt(notion_chunks: list[dict], live_ctx: dict) -> str:
+def _build_system_prompt(notion_chunks: list[dict], live_ctx: dict, cfg: NexusConfig) -> str:
     parts = [
-        "You are NEXUS — Tawin's personal intelligence layer. Bangkok timezone. Developer + student.",
+        f"You are NEXUS — {cfg.user.name}'s personal intelligence layer. "
+        f"{cfg.user.timezone} timezone. {cfg.user.role}.",
         "Answer concisely, grounded in the context below.",
     ]
     if notion_chunks:
@@ -38,13 +41,13 @@ async def chat_stream(
     query: str,
     session_id: str,
     cfg: NexusConfig,
-    engine: OllamaEngine,
+    engine: "LLMBackend",
     store: MemoryStore,
     live_ctx: dict | None = None,
     history: list[dict] | None = None,
 ) -> AsyncIterator[str]:
     notion_chunks = await retrieve(query, engine, store, top_k=cfg.memory.top_k)
-    system = _build_system_prompt(notion_chunks, live_ctx or {})
+    system = _build_system_prompt(notion_chunks, live_ctx or {}, cfg)
     messages = [{"role": "system", "content": system}]
     if history:
         messages.extend(history[-10:])
@@ -58,13 +61,13 @@ async def chat_once(
     query: str,
     session_id: str,
     cfg: NexusConfig,
-    engine: OllamaEngine,
+    engine: "LLMBackend",
     store: MemoryStore,
     live_ctx: dict | None = None,
     history: list[dict] | None = None,
 ) -> tuple[str, list[dict]]:
     notion_chunks = await retrieve(query, engine, store, top_k=cfg.memory.top_k)
-    system = _build_system_prompt(notion_chunks, live_ctx or {})
+    system = _build_system_prompt(notion_chunks, live_ctx or {}, cfg)
     messages = [{"role": "system", "content": system}]
     if history:
         messages.extend(history[-10:])

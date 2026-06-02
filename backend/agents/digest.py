@@ -5,7 +5,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich import box
 from backend.core.config import NexusConfig
-from backend.core.engine import OllamaEngine
+from backend.core.llm.base import LLMBackend
 from backend.connectors.weather import WeatherConnector
 from backend.connectors.calendar import CalendarConnector
 from backend.connectors.gmail import GmailConnector
@@ -17,7 +17,7 @@ console = Console()
 
 
 class DigestAgent:
-    def __init__(self, cfg: NexusConfig, engine: OllamaEngine):
+    def __init__(self, cfg: NexusConfig, engine: LLMBackend):
         self._cfg = cfg
         self._engine = engine
 

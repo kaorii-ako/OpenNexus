@@ -1,16 +1,29 @@
+# OpenNexus configuration
+# Copy this to nexus.toml and fill in your values
+# Or run: nexus init  (interactive wizard)
+
+[user]
+name = "Your Name"
+timezone = "UTC"          # e.g. "America/New_York", "Asia/Bangkok", "Europe/London"
+role = "developer"        # shown to NEXUS as context about you
+
 [nexus]
 data_dir = "~/.nexus"
 notion_cache_dir = "~/.nexus/notion_cache"
-timezone = "Asia/Bangkok"
+timezone = "UTC"          # deprecated — use [user].timezone
 
-[ollama]
-base_url = "http://localhost:11434"
-model_general = "qwen2.5:7b"
-model_code = "qwen2.5-coder:7b"
-model_reasoning = "deepseek-r1:7b"
-model_embed = "nomic-embed-text"
-stream = true
+# ── LLM Provider ─────────────────────────────────────────────────────────────
+# provider: "ollama" | "openai" | "anthropic"
+[llm]
+provider = "ollama"
+model = "llama3.2"
+api_key = ""              # leave empty for Ollama; set for OpenAI/Anthropic
+base_url = "http://localhost:11434"   # Ollama only
+embed_model = "nomic-embed-text"      # Ollama: nomic-embed-text; OpenAI: text-embedding-3-small
+model_code = ""           # optional: use a different model for /code queries
+model_reasoning = ""      # optional: use a different model for /think queries
 
+# ── Memory ───────────────────────────────────────────────────────────────────
 [memory]
 chroma_dir = "~/.nexus/chroma"
 notion_collection = "notion_chunks"
@@ -19,59 +32,64 @@ file_collection = "file_index"
 top_k = 5
 chunk_strategy = "heading"
 
+# ── Server ───────────────────────────────────────────────────────────────────
 [server]
 host = "127.0.0.1"
 port = 8000
 frontend_dist = "./frontend/dist"
 open_browser_on_start = true
 
+# ── Scheduler ────────────────────────────────────────────────────────────────
 [scheduler]
-digest_cron = "0 8 * * *"
+digest_cron = "0 8 * * *"        # morning briefing time (cron syntax)
 notion_sync_cron = "*/15 * * * *"
 reindex_cron = "0 2 * * *"
 
+# ── Digest ───────────────────────────────────────────────────────────────────
 [digest]
 write_to_notion = true
 print_to_terminal = true
 
+# ── Connectors ───────────────────────────────────────────────────────────────
 [connectors.weather]
-latitude = 13.7563
-longitude = 100.5018
-location_name = "Bangkok"
+latitude = 0.0
+longitude = 0.0
+location_name = "Your City"
 
 [connectors.rss]
 sources = [
-  "https://feeds.feedburner.com/oreilly/radar",
-  "https://tldr.tech/api/rss/tech",
   "https://hnrss.org/frontpage",
+  "https://tldr.tech/api/rss/tech",
 ]
 
 [connectors.notion]
 enabled = true
 # token stored in ~/.nexus/notion.json → {"token": "secret_..."}
+# run: nexus connect notion
 
 [connectors.discord]
-enabled = true
+enabled = false
 # token stored in ~/.nexus/discord.json → {"token": "Bot <your_bot_token>"}
+# run: nexus connect discord
 
 [connectors.github]
 enabled = true
 # token stored in ~/.nexus/github.json → {"token": "ghp_..."}
 # required scopes: repo, notifications, read:user
+# run: nexus connect github
 
 [connectors.gmail]
 enabled = true
 # credentials stored in ~/.nexus/gmail_credentials.json (download from GCP console)
-# token auto-saved to ~/.nexus/gmail_token.json after first auth
+# run: nexus connect google
 
 [connectors.calendar]
 enabled = true
 # shares OAuth token with gmail connector
 
 [connectors.classroom]
-enabled = true
+enabled = false
 # shares OAuth token with gmail connector
-# requires Classroom API scope added to GCP project
 
 [connectors.telegram]
 enabled = false

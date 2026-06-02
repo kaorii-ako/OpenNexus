@@ -4,14 +4,13 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from backend.core.config import NexusConfig
-from backend.core.engine import OllamaEngine
+from backend.core.llm import create_backend
 from backend.core.memory import MemoryStore
 from backend.api.routes import chat, digest, notion, connectors, memory
 
 
 def create_app(cfg: NexusConfig) -> FastAPI:
-    engine = OllamaEngine(cfg.ollama.base_url, cfg.ollama.model_general, cfg.ollama.model_embed)
-    engine.set_models(cfg.ollama.model_code, cfg.ollama.model_reasoning)
+    engine = create_backend(cfg.llm)
     store = MemoryStore(Path(cfg.memory.chroma_dir).expanduser())
 
     app = FastAPI(title="NEXUS API")

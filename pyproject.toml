@@ -1,7 +1,7 @@
 [project]
-name = "nexus"
+name = "opennexus"
 version = "0.1.0"
-requires-python = ">=3.13"
+requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.115",
   "uvicorn[standard]>=0.30",
@@ -17,6 +17,11 @@ dependencies = [
   "feedparser>=6.0",
   "aiofiles>=23",
   "pydantic>=2",
+  "openai>=1.30",
+  "anthropic>=0.28",
+  "questionary>=2.0",
+  "tzlocal>=5.0",
+  "tomli>=2.0; python_version < '3.11'",
 ]
 
 [dependency-groups]
