@@ -225,12 +225,12 @@
 
 ### Machine
 
-| Item | Value |
-|---|---|
-| OS | Windows 11 Pro |
-| GPU | RTX 5060 |
-| RAM | ___ GB |
-| Main editor | VS Code / Cursor |
+| Item | Value                         |
+|---|-------------------------------|
+| OS | Windows 11 Pro                |
+| GPU | RTX 5060 (VRAM = 8GB)          |
+| RAM | 32 GB                         |
+| Main editor | VS Code / Cursor              |
 | Terminal | Windows Terminal + PowerShell |
 
 ### Key Paths
