@@ -1,6 +1,6 @@
 # OpenNexus
 
-[![PyPI](https://img.shields.io/pypi/v/opennexus)](https://pypi.org/project/opennexus/)
+[![PyPI](https://img.shields.io/pypi/v/opennexus-ai)](https://pypi.org/project/opennexus-ai/)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue)](https://python.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
