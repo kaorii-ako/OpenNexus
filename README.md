@@ -122,6 +122,99 @@ nexus connect <svc>   # authorize a new connector
 nexus doctor          # check connector health
 ```
 
+**Orchestrator** (see [below](#the-orchestrator)):
+
+```bash
+nexus setup                  # check status, scaffold missing directories
+nexus route "..."            # route a query through the skills, log the decision
+nexus route -a "..."         # route AND answer, grounded in the loaded skills
+nexus evolve                 # review the log for friction, propose one skill edit
+nexus evolve --revert <id>   # undo an applied edit
+nexus replay --last 20       # re-emit real history through the live renderer
+nexus events --verify        # check the append-only log for tampering
+nexus hud                    # dashboard + console at localhost:8420
+```
+
+### LLM providers
+
+`provider` in `[llm]` accepts `auto`, `ollama`, `openai`, or `anthropic`.
+`auto` prefers a local Ollama when one is actually running, and otherwise falls
+back to whichever key is in the environment (`OPENAI_API_KEY` /
+`ANTHROPIC_API_KEY`) — so the key never has to live in `nexus.toml`.
+
+Any **OpenAI-compatible** endpoint works — NVIDIA NIM, Groq, Together, vLLM,
+LM Studio. Point `openai_base_url` at it (or export `OPENAI_BASE_URL`) and set
+`model` to something that endpoint actually serves:
+
+```toml
+[llm]
+provider = "openai"
+openai_base_url = "https://integrate.api.nvidia.com/v1"
+model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+embed_model = "nvidia/nv-embedqa-e5-v5"
+```
+
+A custom endpoint with no `model` set is refused rather than silently 404ing:
+those endpoints do not serve OpenAI's catalogue, so there is no safe default.
+
+---
+
+## The orchestrator
+
+A skill-routing layer that keeps an honest record of its own decisions and
+proposes improvements to itself from that record.
+
+**Routing.** Every query is matched against trigger phrases in
+`skills/<branch>/SKILL.md`, then resolved against the concrete projects
+(`entities`) the query actually names. If resolution needs a branch that trigger
+matching missed, that mid-turn correction is recorded. The outcome signal —
+`clean`, `corrected`, or `unused` — is a comparison of two sets, not a
+model-judged confidence score. There is no confidence score anywhere in the
+schema.
+
+**The log.** Decisions append to `memory/events.jsonl`, one JSON object per
+line. It is opened for writing in exactly one function, always with `O_APPEND`.
+Each record stores the line number it was written at, so `nexus events --verify`
+detects a hand-edit, reorder, or deletion as a sequence mismatch.
+
+**Self-review.** `nexus evolve` reads that log, finds recurring friction, and
+proposes **one** minimal edit to **one** `SKILL.md` — with a plain-English
+reason, the exact events that motivated it cited by id *and* line number, and a
+diff. It waits for an explicit `y/n`. On approval it writes a vault note
+containing the full pre-edit file content, which is what makes
+`nexus evolve --revert <id>` restore the file byte for byte. On rejection it
+records a fingerprint of the edit so the identical proposal is never offered
+again.
+
+When the evidence thresholds in `AGENTIC_OS.md` are not met, it says
+**"not enough signal yet"** and proposes nothing.
+
+**Guardrails, enforced in code.** The orchestrator may write
+`skills/*/SKILL.md` and nothing else. Paths are checked after `resolve()`, so
+neither a symlink nor `..` widens the scope. `AGENTIC_OS.md`, the pointer files,
+and the orchestrator's own source are refused. Deny-by-default — see
+`backend/orchestrator/guardrails.py`.
+
+**Replay.** `nexus replay` is a utility in the sense `git log` is one. It reads
+the same append-only log live operation writes, and renders through the same
+function (`render.render_line`). There is no recorded demo because there is no
+recording step — only history, and the ability to look at it. There is no demo
+mode, presentation mode, or any code path that behaves differently when someone
+is watching.
+
+```
+AGENTIC_OS.md          routing rules — immutable to the orchestrator
+skills/                dev · trading · shared, pointers to real projects
+memory/events.jsonl    append-only decision log
+vault/                 markdown notes, git-tracked, opens in Obsidian
+hud/                   dashboard, reads vault/ and memory/ directly
+```
+
+> **Note:** the orchestrator currently runs from a clone of this repo, because
+> `AGENTIC_OS.md`, `skills/` and `hud/` live at the repo root rather than inside
+> the installed package. `pip install opennexus-ai` gives you the assistant
+> (`ask`, `chat`, `digest`, `serve`); clone the repo for the orchestrator.
+
 ---
 
 ## Configuration

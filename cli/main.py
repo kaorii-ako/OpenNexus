@@ -19,6 +19,7 @@ from backend.core.config import load_config
 from backend.core.llm import create_backend
 from backend.core.memory import MemoryStore
 from backend.agents.chat import chat_once, chat_stream
+from cli import orchestrate
 from cli.init import run_init
 
 app = typer.Typer(help="NEXUS — personal intelligence layer")
@@ -37,6 +38,34 @@ def _init():
     return _cfg, _engine, _store
 
 
+def _orchestrator():
+    """Skill orchestrator for ask/chat. Returns None if it cannot start.
+
+    Routing failing must never take down a query — the assistant predates the
+    orchestrator and still works without it. A failure is reported, not swallowed
+    silently, and nothing is logged when nothing happened.
+    """
+    from backend.orchestrator.constitution import ConstitutionError
+    from backend.orchestrator.router import Orchestrator
+
+    try:
+        return Orchestrator()
+    except (ConstitutionError, OSError) as exc:
+        console.print(f"[dim]routing unavailable: {exc}[/dim]")
+        return None
+
+
+def _route_and_report(orch, query: str) -> str:
+    """Route one query, print the decision, return the skill context to inject."""
+    if orch is None:
+        return ""
+    from backend.orchestrator import render
+
+    decision, event = orch.handle(query)
+    console.print(render.render_line(event))
+    return orch.context_for(decision)
+
+
 @app.command()
 def init(
     output: str = typer.Option("nexus.toml", help="Output path for config file"),
@@ -49,9 +78,11 @@ def init(
 def ask(query: str = typer.Argument(..., help="Question to ask NEXUS")):
     """Single-shot query with rich markdown output."""
     cfg, engine, store = _init()
+    skill_context = _route_and_report(_orchestrator(), query)
 
     async def _run():
-        response, chunks = await chat_once(query, "cli", cfg, engine, store)
+        live_ctx = {"Loaded skills": skill_context} if skill_context else None
+        response, chunks = await chat_once(query, "cli", cfg, engine, store, live_ctx=live_ctx)
         console.print(Markdown(response))
         if chunks:
             sources = ", ".join(c.get("page_title", "?") for c in chunks[:3])
@@ -64,6 +95,7 @@ def ask(query: str = typer.Argument(..., help="Question to ask NEXUS")):
 def chat():
     """Interactive REPL with persistent session history."""
     cfg, engine, store = _init()
+    orch = _orchestrator()
     history = []
     console.print(Panel(
         "[bold]NEXUS Chat[/bold] — /code · /think · Ctrl+C to exit",
@@ -77,8 +109,12 @@ def chat():
             except (KeyboardInterrupt, EOFError):
                 console.print("\n[dim]goodbye[/dim]")
                 break
+            skill_context = _route_and_report(orch, query)
+            live_ctx = {"Loaded skills": skill_context} if skill_context else None
             tokens = []
-            async for token in chat_stream(query, "interactive", cfg, engine, store, history=history):
+            async for token in chat_stream(
+                query, "interactive", cfg, engine, store, live_ctx=live_ctx, history=history
+            ):
                 console.print(token, end="", highlight=False)
                 tokens.append(token)
             response = "".join(tokens)
@@ -225,6 +261,19 @@ def connect(
             token = typer.prompt("Paste your Discord Bot token (Bot <token>)")
             dc_path.write_text(json.dumps({"token": token}))
             console.print(f"[green]✓ Discord token saved to {dc_path}[/green]")
+
+
+# --- orchestrator commands ---------------------------------------------------
+# Defined in cli/orchestrate.py and registered here so they are top-level
+# `nexus` commands. None of them load nexus.toml or an LLM backend: routing,
+# replay and evolution are filesystem-and-log operations.
+
+app.command("route")(orchestrate.route)
+app.command("evolve")(orchestrate.evolve)
+app.command("replay")(orchestrate.replay)
+app.command("events")(orchestrate.events)
+app.command("setup")(orchestrate.setup)
+app.command("hud")(orchestrate.hud)
 
 
 if __name__ == "__main__":

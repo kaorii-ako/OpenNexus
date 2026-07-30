@@ -11,6 +11,19 @@ model_reasoning = "deepseek-r1:7b"
 model_embed = "nomic-embed-text"
 stream = true
 
+[llm]
+# "auto" prefers a local Ollama when one is running, otherwise falls back to
+# whichever cloud key is in the environment (OPENAI_API_KEY / ANTHROPIC_API_KEY).
+provider = "auto"
+# Empty means "use the sensible default for whichever provider resolves" —
+# a model name pinned here would be wrong for the other providers.
+model = "nvidia/llama-3.3-nemotron-super-49b-v1.5"
+api_key = ""
+base_url = "http://localhost:11434"
+embed_model = "nvidia/nv-embedqa-e5-v5"
+model_code = ""
+model_reasoning = ""
+
 [memory]
 chroma_dir = "~/.nexus/chroma"
 notion_collection = "notion_chunks"

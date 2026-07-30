@@ -57,13 +57,16 @@ class UserConfig:
 
 @dataclass
 class LLMConfig:
-    provider: str        # "ollama" | "openai" | "anthropic"
+    provider: str        # "auto" | "ollama" | "openai" | "anthropic"
     model: str
     api_key: str
     base_url: str        # Ollama only
     embed_model: str     # Ollama: "nomic-embed-text"; OpenAI: "text-embedding-3-small"
     model_code: str = ""
     model_reasoning: str = ""
+    # Any OpenAI-compatible endpoint that is not OpenAI — NVIDIA NIM, Groq,
+    # Together, vLLM, LM Studio. Falls back to $OPENAI_BASE_URL when unset.
+    openai_base_url: str = ""
 
 
 @dataclass
@@ -150,6 +153,7 @@ def load_config(path: Path | str | None = None) -> NexusConfig:
         embed_model=lm.get("embed_model", o.get("model_embed", "nomic-embed-text")),
         model_code=lm.get("model_code", o.get("model_code", "")),
         model_reasoning=lm.get("model_reasoning", o.get("model_reasoning", "")),
+        openai_base_url=lm.get("openai_base_url", ""),
     )
 
     # expand data_dir first, then build notion_cache_dir default

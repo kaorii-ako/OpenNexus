@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS // HUD</title>
+<link rel="stylesheet" href="hud.css">
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="brand"><b>NEXUS</b> <span>// ORCHESTRATOR HUD</span></div>
+    <div class="head-right">
+      <span class="badge" id="integrity-badge"><i class="dot"></i><span id="integrity-text">checking log</span></span>
+      <span class="badge ok" id="feed-badge"><i class="dot live"></i><span id="feed-text">live</span></span>
+      <a href="setup.html" class="badge">setup</a>
+    </div>
+  </header>
+
+  <!-- ── left: metrics, all real ─────────────────────────────────────── -->
+  <section class="panel left">
+    <div class="panel-head"><span>metrics</span><span id="metrics-src">vault/ · memory/</span></div>
+    <div class="panel-body">
+
+      <div class="metric-group">
+        <h3>vault</h3>
+        <div class="metric"><span class="k">notes</span><span class="v" id="m-notes">·</span></div>
+        <div class="metric"><span class="k">links</span><span class="v" id="m-links">·</span></div>
+      </div>
+
+      <div class="metric-group">
+        <h3>skills</h3>
+        <div class="metric"><span class="k">branches</span><span class="v" id="m-branches">·</span></div>
+        <div class="metric"><span class="k">pointers</span><span class="v" id="m-pointers">·</span></div>
+        <div class="metric"><span class="k">triggers</span><span class="v" id="m-triggers">·</span></div>
+      </div>
+
+      <div class="metric-group">
+        <h3>routing</h3>
+        <div class="metric"><span class="k">total</span><span class="v" id="m-routes">·</span></div>
+        <div class="metric"><span class="k">clean</span><span class="v green" id="m-clean">·</span></div>
+        <div class="metric"><span class="k">corrected</span><span class="v amber" id="m-corrected">·</span></div>
+        <div class="metric"><span class="k">unused</span><span class="v cyan" id="m-unused">·</span></div>
+      </div>
+
+      <div class="metric-group">
+        <h3>evolution</h3>
+        <div class="metric"><span class="k">applied</span><span class="v green" id="m-applied">·</span></div>
+        <div class="metric"><span class="k">rejected</span><span class="v red" id="m-rejected">·</span></div>
+        <div class="metric"><span class="k">reverted</span><span class="v amber" id="m-reverted">·</span></div>
+        <div class="metric"><span class="k">signal</span><span class="v" id="m-signal">·</span></div>
+        <div class="signal-bar"><i id="signal-fill"></i></div>
+        <div class="signal-note" id="signal-note"></div>
+      </div>
+
+      <div class="metric-group">
+        <h3>log</h3>
+        <div class="metric"><span class="k">events</span><span class="v" id="m-events">·</span></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── centre: vault graph from real frontmatter links ─────────────── -->
+  <section class="panel graph">
+    <canvas id="graph-canvas"></canvas>
+
+    <div class="graph-empty" id="graph-empty">
+      <div>no vault notes yet</div>
+      <div style="font-size:11px">this graph is drawn from real <code>links:</code> frontmatter.<br>
+      it stays empty until notes exist — nothing is mocked in.</div>
+      <div style="font-size:11px" id="graph-empty-next">
+        the first note is written when you approve a <code>nexus evolve</code> edit —<br>
+        which needs routing history first. route some queries below.
+      </div>
+    </div>
+
+    <div class="graph-legend">
+      <div><i style="background:#a78bfa"></i>orchestrator self-edit</div>
+      <div><i style="background:#4fd6c8"></i>dev</div>
+      <div><i style="background:#f0b429"></i>trading</div>
+      <div><i style="background:#ff6b5f"></i>dangling link</div>
+    </div>
+
+    <div class="node-tip" id="node-tip"></div>
+  </section>
+
+  <!-- ── right: event stream — same render models replay uses ────────── -->
+  <section class="panel events">
+    <div class="panel-head"><span>events</span><span id="events-count">·</span></div>
+
+    <div class="event-controls">
+      <button id="btn-live" class="active">live</button>
+      <button id="btn-replay">replay all</button>
+      <button id="btn-replay-20">replay last 20</button>
+      <button id="btn-stop" disabled>stop</button>
+      <button id="btn-speed">1&times;</button>
+    </div>
+
+    <div class="replay-banner" id="replay-banner">replaying history — same log, same renderer as live</div>
+
+    <div class="event-stream" id="event-stream"></div>
+  </section>
+
+  <!-- ── conversation ────────────────────────────────────────────────── -->
+  <section class="panel convo">
+    <div class="panel-head">
+      <span>console</span>
+      <span>
+        <button id="btn-mic" class="mic" title="dictate — browser speech recognition, nothing leaves your machine">mic off</button>
+        <button id="btn-speak" class="mic" title="read answers aloud">speak off</button>
+      </span>
+    </div>
+
+    <div class="convo-stream" id="convo-stream">
+      <div class="convo-hint" id="convo-hint">
+        Ask about your projects. The router loads the matching skills and the
+        answer is grounded in those real pointer files.
+        <div class="convo-examples">
+          <button class="ex">what does FlareBisect actually bisect on</button>
+          <button class="ex">where does Stock-new keep its backtest results</button>
+          <button class="ex">what did I decide about the kaida arrow cluster</button>
+        </div>
+      </div>
+    </div>
+
+    <form class="ask" id="ask-form">
+      <input id="ask-input" type="text" placeholder="ask nexus…" autocomplete="off">
+      <button type="submit" id="btn-send">send</button>
+      <button type="button" id="btn-route-only" title="route without answering">route</button>
+    </form>
+  </section>
+
+  <!-- ── bottom: one hero stat ───────────────────────────────────────── -->
+  <section class="hero">
+    <div>
+      <div class="hero-figure" id="hero-figure">·</div>
+      <div class="hero-label">clean-route rate</div>
+    </div>
+    <div style="flex:1">
+      <div class="hero-bar" id="hero-bar"></div>
+      <div class="hero-sub" id="hero-sub">share of routing decisions that needed no mid-turn correction</div>
+    </div>
+    <div class="hero-key">
+      <span><i style="background:#57d97f"></i>clean</span>
+      <span><i style="background:#f0b429"></i>corrected</span>
+      <span><i style="background:#4fd6c8"></i>unused</span>
+    </div>
+  </section>
+
+</div>
+<script src="hud.js"></script>
+</body>
+</html>

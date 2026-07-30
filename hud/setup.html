@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEXUS // SETUP</title>
+<link rel="stylesheet" href="hud.css">
+</head>
+<body>
+<div class="setup-wrap">
+<div class="setup-inner">
+
+  <h1>Nexus setup</h1>
+  <p class="lede">
+    Live status read from disk. <a href="index.html">&larr; back to HUD</a>
+  </p>
+
+  <div class="card">
+    <h2>System check</h2>
+    <div class="card-body" id="checks">
+      <div class="check"><span class="note">reading…</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Skills</h2>
+    <div class="card-body" id="skills-body">
+      <div class="note">reading…</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Self-modification scope</h2>
+    <div class="card-body">
+      <p style="margin:0 0 12px;color:var(--text-dim);font-size:11px">
+        Read from <code>AGENTIC_OS.md</code> and enforced in
+        <code>backend/orchestrator/guardrails.py</code> on resolved real paths,
+        so neither a symlink nor a <code>..</code> can widen it.
+      </p>
+      <ul class="scope-list" id="scope-list"><li class="note">reading…</li></ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Assistant configuration <span style="text-transform:none;letter-spacing:0">— nexus.toml</span></h2>
+    <div class="card-body">
+      <p style="margin:0 0 16px;color:var(--text-dim);font-size:11px">
+        Only needed for <code>ask</code>, <code>chat</code> and <code>digest</code>.
+        Routing, <code>evolve</code> and <code>replay</code> work without it.
+      </p>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-name">your name</label>
+          <input id="f-name" type="text" placeholder="Alex">
+        </div>
+        <div class="field">
+          <label for="f-tz">timezone</label>
+          <input id="f-tz" type="text" placeholder="Asia/Bangkok">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-role">role</label>
+        <input id="f-role" type="text" placeholder="developer">
+        <div class="hint">given to the assistant as context about you</div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-provider">llm provider</label>
+          <select id="f-provider">
+            <option value="ollama">ollama — local, free, private</option>
+            <option value="openai">openai</option>
+            <option value="anthropic">anthropic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-model">model</label>
+          <input id="f-model" type="text" placeholder="llama3.2">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field" id="wrap-baseurl">
+          <label for="f-baseurl">ollama base url</label>
+          <input id="f-baseurl" type="text" placeholder="http://localhost:11434">
+        </div>
+        <div class="field" id="wrap-apikey">
+          <label for="f-apikey">api key</label>
+          <input id="f-apikey" type="password" placeholder="leave blank to keep existing">
+          <div class="hint" id="key-hint">never displayed back — write-only</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="f-embed">embedding model</label>
+        <input id="f-embed" type="text" placeholder="nomic-embed-text">
+      </div>
+
+      <div class="field">
+        <label>connectors</label>
+        <div class="chips" id="connector-chips"></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="f-city">city — weather</label>
+          <input id="f-city" type="text" placeholder="Bangkok">
+        </div>
+        <div class="row" style="gap:8px">
+          <div class="field">
+            <label for="f-lat">latitude</label>
+            <input id="f-lat" type="text" placeholder="13.7563">
+          </div>
+          <div class="field">
+            <label for="f-lon">longitude</label>
+            <input id="f-lon" type="text" placeholder="100.5018">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="primary" id="btn-save">save nexus.toml</button>
+        <span class="save-msg" id="save-msg"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Commands</h2>
+    <div class="card-body">
+      <table class="cmd-table">
+        <tr><td>nexus setup</td><td>check status, scaffold missing directories</td></tr>
+        <tr><td>nexus route "…"</td><td>route a query through the skills and log the decision</td></tr>
+        <tr><td>nexus evolve</td><td>review the log for friction, propose one skill edit</td></tr>
+        <tr><td>nexus evolve --dry-run</td><td>show findings without proposing</td></tr>
+        <tr><td>nexus evolve --history</td><td>list applied, rejected and reverted edits</td></tr>
+        <tr><td>nexus evolve --revert &lt;id&gt;</td><td>restore a file from its vault note</td></tr>
+        <tr><td>nexus replay --last 20</td><td>re-emit real history through the live renderer</td></tr>
+        <tr><td>nexus replay --since 2h</td><td>replay a time window</td></tr>
+        <tr><td>nexus events --verify</td><td>check the log for tampering</td></tr>
+        <tr><td>nexus hud</td><td>serve this dashboard</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+<script src="setup.js"></script>
+</body>
+</html>
